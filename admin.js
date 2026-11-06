@@ -25,6 +25,43 @@ const ordersStatus = document.getElementById("ordersStatus");
 const orderPageSummaries = document.querySelectorAll(".order-page-summary");
 const previousOrdersButtons = document.querySelectorAll("[data-previous-orders]");
 const nextOrdersButtons = document.querySelectorAll("[data-next-orders]");
+const adminTabs = [...document.querySelectorAll("[data-admin-tab]")];
+
+function activateAdminTab(tab, moveFocus = false) {
+  const panel = document.getElementById(tab.getAttribute("aria-controls"));
+  if (!panel) {
+    console.error(`Admin tab panel not found for "${tab.dataset.adminTab}".`);
+    return;
+  }
+
+  adminTabs.forEach(item => {
+    const isSelected = item === tab;
+    item.setAttribute("aria-selected", String(isSelected));
+    item.tabIndex = isSelected ? 0 : -1;
+    const controlledPanel = document.getElementById(item.getAttribute("aria-controls"));
+    if (controlledPanel) controlledPanel.hidden = !isSelected;
+  });
+
+  if (moveFocus) tab.focus();
+}
+
+adminTabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => activateAdminTab(tab));
+  tab.addEventListener("keydown", event => {
+    let nextIndex;
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % adminTabs.length;
+    else if (event.key === "ArrowLeft") nextIndex = (index - 1 + adminTabs.length) % adminTabs.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = adminTabs.length - 1;
+    else return;
+
+    event.preventDefault();
+    activateAdminTab(adminTabs[nextIndex], true);
+  });
+});
+const initiallySelectedTab = adminTabs.find(tab => tab.getAttribute("aria-selected") === "true");
+if (initiallySelectedTab) activateAdminTab(initiallySelectedTab);
+
 function setStatus(element, message, state = "error") {
   element.textContent = message;
   element.dataset.state = state;
