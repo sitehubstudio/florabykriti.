@@ -603,3 +603,4 @@ async function initializeCustomerAccount() {
 }
 
 void initializeCustomerAccount();
+
