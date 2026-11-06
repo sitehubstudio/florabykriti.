@@ -4,18 +4,13 @@ const FLORA_ADMIN_USER_ID = "ecaa7366-e7a3-4d0c-b3bb-859403379f2b";
 const FLORA_PRODUCT_BUCKET = "flora-products";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const ORDERS_PER_PAGE = 50;
+const ORDERS_PER_PAGE = 10;
 
 let adminProducts = [];
 let adminOrders = [];
 let currentOrderPage = 0;
 let totalAdminOrderCount = 0;
 let currentImageUrl = "";
-let communicationSettings = {
-  business_whatsapp_number: "",
-  upi_id: "",
-  payment_instructions: ""
-};
 
 const loginPanel = document.getElementById("loginPanel");
 const dashboardPanel = document.getElementById("dashboardPanel");
@@ -27,12 +22,9 @@ const imageInput = document.getElementById("productImage");
 const imagePreview = document.getElementById("imagePreview");
 const orderList = document.getElementById("adminOrderList");
 const ordersStatus = document.getElementById("ordersStatus");
-const orderPageSummary = document.getElementById("orderPageSummary");
-const previousOrdersButton = document.getElementById("previousOrdersBtn");
-const nextOrdersButton = document.getElementById("nextOrdersBtn");
-const communicationSettingsForm = document.getElementById("communicationSettingsForm");
-const communicationSettingsStatus = document.getElementById("communicationSettingsStatus");
-
+const orderPageSummaries = document.querySelectorAll(".order-page-summary");
+const previousOrdersButtons = document.querySelectorAll("[data-previous-orders]");
+const nextOrdersButtons = document.querySelectorAll("[data-next-orders]");
 function setStatus(element, message, state = "error") {
   element.textContent = message;
   element.dataset.state = state;
@@ -65,16 +57,6 @@ function formatOrderDate(value) {
     : date.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 }
 
-function paymentMethodLabel(method) {
-  return method === "upi" ? "UPI"
-    : method === "cod" ? "Cash on Delivery"
-      : "Not selected";
-}
-
-function paymentStatusLabel(status) {
-  return status === "paid" ? "Paid" : "Pending";
-}
-
 function renderAdminOrders() {
   orderList.setAttribute("aria-busy", "false");
   const firstOrderNumber = totalAdminOrderCount === 0
@@ -84,10 +66,16 @@ function renderAdminOrders() {
     (currentOrderPage + 1) * ORDERS_PER_PAGE,
     totalAdminOrderCount
   );
-  orderPageSummary.textContent =
-    `Showing ${firstOrderNumber}–${lastOrderNumber} of ${totalAdminOrderCount} orders`;
-  previousOrdersButton.disabled = currentOrderPage === 0;
-  nextOrdersButton.disabled = lastOrderNumber >= totalAdminOrderCount;
+  orderPageSummaries.forEach(summary => {
+    summary.textContent =
+      `Showing ${firstOrderNumber}–${lastOrderNumber} of ${totalAdminOrderCount} orders`;
+  });
+  previousOrdersButtons.forEach(button => {
+    button.disabled = currentOrderPage === 0;
+  });
+  nextOrdersButtons.forEach(button => {
+    button.disabled = lastOrderNumber >= totalAdminOrderCount;
+  });
 
   if (adminOrders.length === 0) {
     orderList.innerHTML = '<p class="admin-help">No orders received yet.</p>';
@@ -106,71 +94,77 @@ function renderAdminOrders() {
       <div class="admin-order-customer">
         <p><strong>${escapeAdminHTML(order.customer_name)}</strong> · <a href="tel:${escapeAdminHTML(order.customer_phone)}">${escapeAdminHTML(order.customer_phone)}</a></p>
         <p>${escapeAdminHTML(order.delivery_address)}</p>
-        ${order.customer_note ? `<p><strong>Delivery / order instructions:</strong> ${escapeAdminHTML(order.customer_note)}</p>` : ""}
+        ${order.customer_note ? `<p><strong>Note:</strong> ${escapeAdminHTML(order.customer_note)}</p>` : ""}
       </div>
       <ul class="admin-order-items">
         ${(order.items || []).map(item => `
           <li>
-            <span>${escapeAdminHTML(item.product_name)} × ${escapeAdminHTML(item.quantity)}<small>${formatPrice(item.unit_price)} each</small></span>
+            <span>${escapeAdminHTML(item.product_name)} × ${escapeAdminHTML(item.quantity)}</span>
             <strong>${formatPrice(Number(item.unit_price) * Number(item.quantity))}</strong>
           </li>
         `).join("")}
       </ul>
-      <div class="admin-order-meta">
-        <p><strong>Payment:</strong> ${escapeAdminHTML(paymentMethodLabel(order.payment_method))} · ${escapeAdminHTML(paymentStatusLabel(order.payment_status))}</p>
-        ${order.tracking_information ? `<p><strong>Tracking:</strong> ${escapeAdminHTML(order.tracking_information)}</p>` : ""}
-      </div>
       <div class="admin-order-status">
         <label for="order-status-${escapeAdminHTML(order.id)}">Status</label>
         <select id="order-status-${escapeAdminHTML(order.id)}" data-order-status="${escapeAdminHTML(order.id)}">
-          ${["pending", "confirmed", "processing", "shipped", "delivered", "fulfilled", "cancelled"].map(status => `
+          ${["pending", "confirmed", "fulfilled", "cancelled"].map(status => `
             <option value="${status}" ${order.status === status ? "selected" : ""}>${status[0].toUpperCase()}${status.slice(1)}</option>
           `).join("")}
         </select>
         <button class="btn btn-secondary" type="button" data-save-order-status="${escapeAdminHTML(order.id)}">Save status</button>
       </div>
-      <div class="admin-order-edit-grid">
-        <label>Payment method
-          <select data-payment-method="${escapeAdminHTML(order.id)}">
-            <option value="" ${!order.payment_method ? "selected" : ""}>Not selected</option>
-            <option value="upi" ${order.payment_method === "upi" ? "selected" : ""}>UPI</option>
-            <option value="cod" ${order.payment_method === "cod" ? "selected" : ""}>Cash on Delivery</option>
-          </select>
-        </label>
-        <label>Payment status
-          <select data-payment-status="${escapeAdminHTML(order.id)}">
-            <option value="pending" ${order.payment_status !== "paid" ? "selected" : ""}>Pending</option>
-            <option value="paid" ${order.payment_status === "paid" ? "selected" : ""}>Paid</option>
-          </select>
-        </label>
-        <label class="admin-tracking-field">Tracking information
-          <input type="text" maxlength="1000" data-tracking-information="${escapeAdminHTML(order.id)}" value="${escapeAdminHTML(order.tracking_information || "")}" placeholder="Optional tracking link or details">
-        </label>
-        <button class="btn btn-secondary" type="button" data-save-order-details="${escapeAdminHTML(order.id)}">Save order details</button>
-      </div>
-      <div class="admin-order-actions">
-        <button class="btn btn-primary" type="button" data-order-action="message" data-order-id="${escapeAdminHTML(order.id)}" ${order.status === "cancelled" ? "disabled" : ""}>${order.payment_status === "paid" ? "WhatsApp: Order update" : "WhatsApp: Confirm & request payment"}</button>
-        ${order.payment_status === "paid"
-          ? `<button class="btn btn-secondary" type="button" data-order-action="payment-received" data-order-id="${escapeAdminHTML(order.id)}">WhatsApp: Payment received</button>`
-          : ""}
-        ${order.payment_status !== "paid" && order.status !== "cancelled"
-          ? `<button class="btn btn-secondary" type="button" data-order-action="mark-paid-confirmed" data-order-id="${escapeAdminHTML(order.id)}">Mark as Paid & Confirm Order</button>`
-          : ""}
-        <button class="btn btn-secondary" type="button" data-order-action="copy" data-order-id="${escapeAdminHTML(order.id)}">Copy Order Details</button>
-        <button class="btn btn-secondary" type="button" data-order-action="confirmed" data-order-id="${escapeAdminHTML(order.id)}" ${order.status === "confirmed" ? "disabled" : ""}>Mark as Confirmed</button>
-        <button class="btn btn-secondary" type="button" data-order-action="shipped" data-order-id="${escapeAdminHTML(order.id)}" ${order.status === "shipped" ? "disabled" : ""}>Mark as Shipped</button>
-        <button class="btn btn-secondary" type="button" data-order-action="delivered" data-order-id="${escapeAdminHTML(order.id)}" ${order.status === "delivered" ? "disabled" : ""}>Mark as Delivered</button>
+      <div class="admin-order-status">
+        <label for="payment-method-${escapeAdminHTML(order.id)}">Payment method</label>
+        <select id="payment-method-${escapeAdminHTML(order.id)}" data-payment-method="${escapeAdminHTML(order.id)}">
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+        <button class="btn btn-secondary" type="button" data-send-payment-request="${escapeAdminHTML(order.id)}">Prepare payment message</button>
       </div>
     </article>
   `).join("");
+}
+
+function preparePaymentMessage(orderId) {
+  const order = adminOrders.find(item => String(item.id) === orderId);
+  const methodSelect = orderList.querySelector(`[data-payment-method="${CSS.escape(orderId)}"]`);
+  if (!order || !methodSelect) return;
+
+  const phone = String(order.customer_phone).replace(/\D/g, "");
+  const whatsappPhone = phone.length === 10 ? `91${phone}` : phone;
+  if (!/^\d{11,15}$/.test(whatsappPhone)) {
+    setStatus(ordersStatus, `Could not prepare payment message for order #${order.order_number}: the customer phone number is invalid.`);
+    return;
+  }
+
+  const message = [
+    "🌸 *Flora by Kriti*",
+    "",
+    "Your order is almost confirmed!",
+    "",
+    "Please complete your payment to proceed with your order.",
+    "",
+    `💰 *Order Amount:* ${formatPrice(order.total_amount)}`,
+    `💳 *Payment Method:* ${methodSelect.value}`,
+    "",
+    "Once the payment is completed, please share the payment screenshot with us.",
+    "",
+    "Thank you for shopping with Flora by Kriti! 💐"
+  ].join("\n");
+  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, "_blank", "noopener,noreferrer");
 }
 
 async function loadAdminOrders() {
   orderList.setAttribute("aria-busy", "true");
   orderList.innerHTML = '<p class="admin-help">Loading orders…</p>';
   ordersStatus.textContent = "";
-  previousOrdersButton.disabled = true;
-  nextOrdersButton.disabled = true;
+  previousOrdersButtons.forEach(button => {
+    button.disabled = true;
+  });
+  nextOrdersButtons.forEach(button => {
+    button.disabled = true;
+  });
 
   let orders;
   let count;
@@ -178,7 +172,7 @@ async function loadAdminOrders() {
   try {
     ({ data: orders, count, error } = await window.floraSupabase
       .from("orders")
-      .select("id, order_number, customer_name, customer_phone, delivery_address, customer_note, status, total_amount, payment_method, payment_status, tracking_information, created_at", { count: "exact" })
+      .select("id, order_number, customer_name, customer_phone, delivery_address, customer_note, status, total_amount, created_at", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(
         currentOrderPage * ORDERS_PER_PAGE,
@@ -187,7 +181,9 @@ async function loadAdminOrders() {
   } catch (loadError) {
     orderList.setAttribute("aria-busy", "false");
     orderList.innerHTML = "";
-    orderPageSummary.textContent = "";
+    orderPageSummaries.forEach(summary => {
+      summary.textContent = "";
+    });
     console.error("Could not load orders:", loadError);
     setStatus(ordersStatus, `Could not load orders: ${loadError.message || "Network error."}`);
     return;
@@ -196,7 +192,9 @@ async function loadAdminOrders() {
   if (error) {
     orderList.setAttribute("aria-busy", "false");
     orderList.innerHTML = "";
-    orderPageSummary.textContent = "";
+    orderPageSummaries.forEach(summary => {
+      summary.textContent = "";
+    });
     setStatus(ordersStatus, `Could not load orders: ${error.message}`);
     return;
   }
@@ -234,10 +232,16 @@ async function loadAdminOrders() {
   } catch (itemsError) {
     orderList.setAttribute("aria-busy", "false");
     orderList.innerHTML = "";
-    orderPageSummary.textContent = "";
-    previousOrdersButton.disabled = currentOrderPage === 0;
-    nextOrdersButton.disabled =
-      (currentOrderPage + 1) * ORDERS_PER_PAGE >= totalAdminOrderCount;
+    orderPageSummaries.forEach(summary => {
+      summary.textContent = "";
+    });
+    previousOrdersButtons.forEach(button => {
+      button.disabled = currentOrderPage === 0;
+    });
+    nextOrdersButtons.forEach(button => {
+      button.disabled =
+        (currentOrderPage + 1) * ORDERS_PER_PAGE >= totalAdminOrderCount;
+    });
     console.error("Could not load order items:", itemsError);
     setStatus(ordersStatus, `Orders loaded, but their items could not be loaded: ${itemsError.message || "Unexpected error."}`);
     return;
@@ -253,19 +257,11 @@ async function saveOrderStatus(orderId) {
   if (!order || !select || !button) return;
 
   button.disabled = true;
-  try {
-    await updateOrderStatus(order, select.value);
-  } finally {
-    button.disabled = false;
-  }
-}
-
-async function updateOrderStatus(order, status) {
   ordersStatus.textContent = "";
   try {
     const { data, error } = await window.floraSupabase
       .from("orders")
-      .update({ status })
+      .update({ status: select.value })
       .eq("id", order.id)
       .select("id")
       .maybeSingle();
@@ -274,248 +270,11 @@ async function updateOrderStatus(order, status) {
       throw new Error("No order was updated. Check owner access and database policies.");
     }
 
-    setStatus(ordersStatus, `Order #${order.order_number} updated to ${status}.`, "success");
+    setStatus(ordersStatus, `Order #${order.order_number} updated to ${select.value}.`, "success");
     await loadAdminOrders();
   } catch (error) {
     console.error("Could not update order status:", error);
     setStatus(ordersStatus, `Could not update order status: ${error.message || "Unexpected error."}`);
-  }
-}
-
-async function markOrderPaidAndConfirmed(order) {
-  ordersStatus.textContent = "";
-  try {
-    const { data, error } = await window.floraSupabase
-      .from("orders")
-      .update({ payment_status: "paid", status: "confirmed" })
-      .eq("id", order.id)
-      .select("id")
-      .maybeSingle();
-    if (error) throw error;
-    if (!data) {
-      throw new Error("No order was updated. Check owner access and database policies.");
-    }
-
-    setStatus(
-      ordersStatus,
-      `Order #${order.order_number} marked as paid and confirmed.`,
-      "success"
-    );
-    await loadAdminOrders();
-  } catch (error) {
-    console.error("Could not mark order as paid and confirmed:", error);
-    setStatus(
-      ordersStatus,
-      `Could not update payment and order status: ${error.message || "Unexpected error."}`
-    );
-  }
-}
-
-async function saveOrderDetails(orderId, button) {
-  const order = adminOrders.find(item => String(item.id) === orderId);
-  const paymentMethod = orderList.querySelector(`[data-payment-method="${CSS.escape(orderId)}"]`)?.value || null;
-  const paymentStatus = orderList.querySelector(`[data-payment-status="${CSS.escape(orderId)}"]`)?.value;
-  const trackingInformation = orderList.querySelector(`[data-tracking-information="${CSS.escape(orderId)}"]`)?.value.trim() || null;
-  if (!order || !paymentStatus) return;
-
-  button.disabled = true;
-  ordersStatus.textContent = "";
-  try {
-    const { data, error } = await window.floraSupabase
-      .from("orders")
-      .update({
-        payment_method: paymentMethod,
-        payment_status: paymentStatus,
-        tracking_information: trackingInformation
-      })
-      .eq("id", order.id)
-      .select("id")
-      .maybeSingle();
-    if (error) throw error;
-    if (!data) throw new Error("No order was updated. Check owner access and database policies.");
-
-    setStatus(ordersStatus, `Payment and tracking details saved for order #${order.order_number}.`, "success");
-    await loadAdminOrders();
-  } catch (error) {
-    console.error("Could not save order details:", error);
-    setStatus(ordersStatus, `Could not save order details: ${error.message || "Unexpected error."}`);
-  } finally {
-    button.disabled = false;
-  }
-}
-
-function getCustomerWhatsAppNumber(phone) {
-  const digits = String(phone || "").replace(/\D/g, "");
-  if (digits.length === 10) return `91${digits}`;
-  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}`;
-  return digits.length >= 8 && digits.length <= 15 ? digits : "";
-}
-
-function getOrderConfirmationMessage(order) {
-  const items = (order.items || []).map(item =>
-    `• ${item.product_name} × ${item.quantity} — ${formatPrice(Number(item.unit_price) * Number(item.quantity))}`
-  );
-  const lines = [
-    "Flora by Kriti — Order confirmation",
-    "",
-    `We’ve received order #${order.order_number}.`,
-    "",
-    "Order summary:",
-    ...(items.length ? items : ["• Product details unavailable"]),
-    `Total: ${formatPrice(order.total_amount)}`,
-    `Delivery address: ${order.delivery_address}`
-  ];
-
-  if (order.payment_status === "paid") {
-    lines.push("", "Your order is confirmed and being prepared. We’ll keep you updated about the delivery date.");
-  } else if (order.payment_method === "upi") {
-    lines.push("", `To confirm your order, please pay ${formatPrice(order.total_amount)}.`);
-    if (communicationSettings.upi_id) lines.push(`UPI ID: ${communicationSettings.upi_id}`);
-    if (communicationSettings.payment_instructions) lines.push(communicationSettings.payment_instructions);
-    if (!communicationSettings.upi_id && !communicationSettings.payment_instructions) {
-      lines.push("Reply to this message and we’ll share the payment details.");
-    }
-    lines.push("After paying, please send a screenshot of the payment confirmation. We’ll confirm your order and update you about the delivery date.");
-  } else if (order.payment_method === "cod") {
-    lines.push("", `Your order is confirmed. Please pay ${formatPrice(order.total_amount)} when it is delivered.`);
-  } else {
-    lines.push("", "We’ll confirm your payment method and share the payment details shortly.");
-  }
-
-  lines.push("", "Thank you for choosing Flora by Kriti.");
-  return lines.join("\n");
-}
-
-function getPaymentReceivedMessage(order) {
-  return [
-    "Flora by Kriti — Payment received",
-    "",
-    `We’ve received your payment of ${formatPrice(order.total_amount)} for order #${order.order_number}.`,
-    "",
-    "Your order is now being prepared. We’ll keep you updated and let you know the delivery date.",
-    "",
-    "Thank you for choosing Flora by Kriti."
-  ].join("\n");
-}
-
-function getOrderDetailsText(order) {
-  const items = (order.items || []).map(item =>
-    `${item.product_name} × ${item.quantity} — ${formatPrice(item.unit_price)} each (${formatPrice(Number(item.unit_price) * Number(item.quantity))})`
-  );
-  return [
-    `Order #${order.order_number}`,
-    `Customer: ${order.customer_name}`,
-    `Phone: ${order.customer_phone}`,
-    `Status: ${order.status}`,
-    `Payment: ${paymentMethodLabel(order.payment_method)} (${paymentStatusLabel(order.payment_status)})`,
-    `Total: ${formatPrice(order.total_amount)}`,
-    "Products:",
-    ...(items.length ? items : ["Product details unavailable"]),
-    `Delivery address: ${order.delivery_address}`,
-    order.customer_note ? `Delivery / order instructions: ${order.customer_note}` : "",
-    order.tracking_information ? `Tracking information: ${order.tracking_information}` : ""
-  ].filter(Boolean).join("\n");
-}
-
-function openCustomerWhatsApp(order, includeMessage) {
-  const phone = getCustomerWhatsAppNumber(order.customer_phone);
-  if (!phone) {
-    setStatus(ordersStatus, `Order #${order.order_number} has no valid WhatsApp phone number.`);
-    return;
-  }
-  const message = includeMessage ? `?text=${encodeURIComponent(getOrderConfirmationMessage(order))}` : "";
-  window.open(`https://wa.me/${phone}${message}`, "_blank", "noopener,noreferrer");
-}
-
-async function handleOrderAction(action, orderId) {
-  const order = adminOrders.find(item => String(item.id) === orderId);
-  if (!order) return;
-
-  if (action === "whatsapp") {
-    openCustomerWhatsApp(order, false);
-  } else if (action === "message") {
-    openCustomerWhatsApp(order, true);
-  } else if (action === "payment-received") {
-    const phone = getCustomerWhatsAppNumber(order.customer_phone);
-    if (!phone) {
-      setStatus(ordersStatus, `Order #${order.order_number} has no valid WhatsApp phone number.`);
-      return;
-    }
-    window.open(
-      `https://wa.me/${phone}?text=${encodeURIComponent(getPaymentReceivedMessage(order))}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  } else if (action === "mark-paid-confirmed") {
-    await markOrderPaidAndConfirmed(order);
-  } else if (action === "copy") {
-    try {
-      await navigator.clipboard.writeText(getOrderDetailsText(order));
-      setStatus(ordersStatus, `Order #${order.order_number} details copied.`, "success");
-    } catch (error) {
-      console.error("Could not copy order details:", error);
-      setStatus(ordersStatus, "Could not copy order details. Check clipboard permissions and try again.");
-    }
-  } else if (["confirmed", "shipped", "delivered"].includes(action)) {
-    await updateOrderStatus(order, action);
-  }
-}
-
-async function loadCommunicationSettings() {
-  communicationSettingsStatus.textContent = "";
-  try {
-    const { data, error } = await window.floraSupabase
-      .from("shop_whatsapp_settings")
-      .select("business_whatsapp_number, upi_id, payment_instructions")
-      .eq("id", true)
-      .maybeSingle();
-    if (error) throw error;
-    if (!data) throw new Error("Settings row is missing. Run supabase-whatsapp-order-communication.sql in Supabase.");
-
-    communicationSettings = data;
-    document.getElementById("businessWhatsappNumber").value = data.business_whatsapp_number || "";
-    document.getElementById("businessUpiId").value = data.upi_id || "";
-    document.getElementById("businessPaymentInstructions").value = data.payment_instructions || "";
-  } catch (error) {
-    console.error("Could not load WhatsApp settings:", error);
-    setStatus(
-      communicationSettingsStatus,
-      `Could not load WhatsApp settings: ${error.message || "Unexpected error."} Check that the dashboard migration has been applied.`
-    );
-  }
-}
-
-async function saveCommunicationSettings(event) {
-  event.preventDefault();
-  const button = document.getElementById("saveCommunicationSettingsBtn");
-  const businessWhatsappNumber = document.getElementById("businessWhatsappNumber").value.trim();
-  const upiId = document.getElementById("businessUpiId").value.trim();
-  const paymentInstructions = document.getElementById("businessPaymentInstructions").value.trim();
-
-  if (businessWhatsappNumber && !/^[0-9]{8,15}$/.test(businessWhatsappNumber)) {
-    setStatus(communicationSettingsStatus, "Enter the business WhatsApp number in international format using 8–15 digits, without + or spaces.");
-    return;
-  }
-
-  button.disabled = true;
-  communicationSettingsStatus.textContent = "";
-  try {
-    const settings = {
-      id: true,
-      business_whatsapp_number: businessWhatsappNumber,
-      upi_id: upiId,
-      payment_instructions: paymentInstructions
-    };
-    const { error } = await window.floraSupabase
-      .from("shop_whatsapp_settings")
-      .upsert(settings, { onConflict: "id" });
-    if (error) throw error;
-
-    communicationSettings = settings;
-    setStatus(communicationSettingsStatus, "WhatsApp and payment settings saved.", "success");
-  } catch (error) {
-    console.error("Could not save WhatsApp settings:", error);
-    setStatus(communicationSettingsStatus, `Could not save settings: ${error.message || "Unexpected error."}`);
   } finally {
     button.disabled = false;
   }
@@ -524,21 +283,6 @@ async function saveCommunicationSettings(event) {
 function setSignedInView(isSignedIn) {
   loginPanel.hidden = isSignedIn;
   dashboardPanel.hidden = !isSignedIn;
-}
-
-function showAdminTab(name, focusTab = false) {
-  const tabs = [...document.querySelectorAll("[data-admin-tab]")];
-  const selectedTab = tabs.find(tab => tab.dataset.adminTab === name);
-  if (!selectedTab) return;
-
-  tabs.forEach(tab => {
-    const isSelected = tab === selectedTab;
-    tab.setAttribute("aria-selected", String(isSelected));
-    tab.tabIndex = isSelected ? 0 : -1;
-    document.getElementById(tab.getAttribute("aria-controls")).hidden = !isSelected;
-  });
-
-  if (focusTab) selectedTab.focus();
 }
 
 function resetProductForm() {
@@ -721,11 +465,7 @@ async function deleteProduct(productId) {
 
   setStatus(dashboardStatus, "Product deleted.", "success");
   await deleteUploadedImage(product.image_url);
-  await Promise.all([
-    loadAdminProducts(),
-    loadAdminOrders(),
-    loadCommunicationSettings()
-  ]);
+  await loadAdminProducts();
 }
 
 async function getUploadedImagePath(imageUrl) {
@@ -769,11 +509,7 @@ async function showDashboard(user) {
     return;
   }
 
-  await Promise.all([
-    loadAdminProducts(),
-    loadAdminOrders(),
-    loadCommunicationSettings()
-  ]);
+  await loadAdminProducts();
 }
 
 async function initializeAdmin() {
@@ -832,28 +568,6 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
   const { error } = await window.floraSupabase.auth.signOut();
   if (error) setStatus(dashboardStatus, `Could not sign out: ${error.message}`);
 });
-document.querySelector(".admin-tabs").addEventListener("click", event => {
-  if (!(event.target instanceof Element)) return;
-  const tab = event.target.closest("[data-admin-tab]");
-  if (tab) showAdminTab(tab.dataset.adminTab);
-});
-document.querySelector(".admin-tabs").addEventListener("keydown", event => {
-  if (!(event.target instanceof Element) || !event.target.matches("[data-admin-tab]")) return;
-  const tabs = [...document.querySelectorAll("[data-admin-tab]")];
-  const currentIndex = tabs.indexOf(event.target);
-  const nextIndex = event.key === "ArrowRight"
-    ? (currentIndex + 1) % tabs.length
-    : event.key === "ArrowLeft"
-      ? (currentIndex - 1 + tabs.length) % tabs.length
-      : event.key === "Home"
-        ? 0
-        : event.key === "End"
-          ? tabs.length - 1
-          : -1;
-  if (nextIndex < 0) return;
-  event.preventDefault();
-  showAdminTab(tabs[nextIndex].dataset.adminTab, true);
-});
 document.getElementById("refreshProductsBtn").addEventListener("click", () => {
   dashboardStatus.textContent = "";
   void loadAdminProducts();
@@ -861,19 +575,27 @@ document.getElementById("refreshProductsBtn").addEventListener("click", () => {
 document.getElementById("refreshOrdersBtn").addEventListener("click", () => {
   void loadAdminOrders();
 });
-previousOrdersButton.addEventListener("click", () => {
-  if (currentOrderPage === 0) return;
-  currentOrderPage -= 1;
-  void loadAdminOrders();
+function changeOrderPage(pageChange) {
+  const nextPage = currentOrderPage + pageChange;
+  const lastPage = Math.max(0, Math.ceil(totalAdminOrderCount / ORDERS_PER_PAGE) - 1);
+  if (nextPage < 0 || nextPage > lastPage) return;
+
+  currentOrderPage = nextPage;
+  void loadAdminOrders().then(() => {
+    document.getElementById("ordersHeading").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  });
+}
+previousOrdersButtons.forEach(button => {
+  button.addEventListener("click", () => changeOrderPage(-1));
 });
-nextOrdersButton.addEventListener("click", () => {
-  if ((currentOrderPage + 1) * ORDERS_PER_PAGE >= totalAdminOrderCount) return;
-  currentOrderPage += 1;
-  void loadAdminOrders();
+nextOrdersButtons.forEach(button => {
+  button.addEventListener("click", () => changeOrderPage(1));
 });
 document.getElementById("cancelEditBtn").addEventListener("click", resetProductForm);
 productForm.addEventListener("submit", handleProductSave);
-communicationSettingsForm.addEventListener("submit", saveCommunicationSettings);
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
   if (!file) {
@@ -900,28 +622,18 @@ productList.addEventListener("click", event => {
 
   if (button.dataset.editProduct) {
     const product = adminProducts.find(item => String(item.id) === button.dataset.editProduct);
-    if (product) {
-      showAdminTab("products");
-      beginProductEdit(product);
-    }
+    if (product) beginProductEdit(product);
   } else if (button.dataset.deleteProduct) {
     void deleteProduct(button.dataset.deleteProduct);
   }
 });
 orderList.addEventListener("click", event => {
   if (!(event.target instanceof Element)) return;
-  const actionButton = event.target.closest("[data-order-action]");
-  if (actionButton) {
-    void handleOrderAction(actionButton.dataset.orderAction, actionButton.dataset.orderId);
+  const paymentButton = event.target.closest("[data-send-payment-request]");
+  if (paymentButton) {
+    preparePaymentMessage(paymentButton.dataset.sendPaymentRequest);
     return;
   }
-
-  const detailsButton = event.target.closest("[data-save-order-details]");
-  if (detailsButton) {
-    void saveOrderDetails(detailsButton.dataset.saveOrderDetails, detailsButton);
-    return;
-  }
-
   const statusButton = event.target.closest("[data-save-order-status]");
   if (statusButton) {
     void saveOrderStatus(statusButton.dataset.saveOrderStatus);
