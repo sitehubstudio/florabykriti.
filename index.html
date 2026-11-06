@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flora by Kriti | Handcrafted Luxury Flowers & Floral Lamps</title>
+  <meta name="description" content="Guwahati's luxury boutique for handcrafted everlasting flowers, bouquets, and artisanal floral lamps. Personalized gifting & custom orders.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <p>Handcrafted with love &bull; Delivery across India</p>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="site-header" id="header">
+    <div class="nav-container">
+      <a href="#hero" class="brand-logo">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+              <path d="M32 66V34M32 49C24 43 19 36 17 27M32 52C40 46 45 39 47 30M32 42C25 37 23 30 24 23M32 38C39 32 40 26 38 20"/>
+              <path d="M17 27C9 28 7 22 12 17C15 14 19 17 21 21M17 27C12 21 13 15 18 13C22 12 24 17 24 23M47 30C55 30 58 24 53 19C50 16 46 19 43 24M47 30C52 24 51 18 46 16C42 15 39 19 38 25"/>
+              <path d="M31 34C25 31 20 26 20 20C20 16 24 14 27 17C30 19 31 23 32 27C33 22 35 17 39 16C43 15 46 19 44 23C42 28 37 32 32 34Z"/>
+              <path d="M23 45C18 40 13 39 11 42C9 46 14 50 23 51M41 48C47 43 52 43 54 46C56 50 50 53 41 54"/>
+            </g>
+          </svg>
+        </span>
+        <div class="brand-text">
+          <span class="brand-name">Flora by Kriti</span>
+          <span class="brand-subtitle">Artisan Floral Studio &bull; Guwahati</span>
+        </div>
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="products.html" class="nav-item">Collection</a>
+        <a href="#story" class="nav-item">Our Story</a>
+        <a href="#custom-order" class="nav-item">Custom Orders</a>
+        <a href="#gallery" class="nav-item">Lookbook</a>
+        <a href="#why-us" class="nav-item">Why Us</a>
+        <a href="account.html" class="nav-item">My Account</a>
+        <a href="#contact" class="nav-cta whatsapp-btn-header">
+          <i class="fab fa-whatsapp"></i> Chat with Us
+        </a>
+      </nav>
+
+      <!-- Cart Button & Mobile Menu Toggle -->
+      <div class="nav-actions-right">
+        <button class="cart-trigger-btn" id="openCartBtn" aria-label="View Shopping Cart">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-count-badge" id="cartBadge">0</span>
+        </button>
+        <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle navigation menu" aria-controls="navLinks" aria-expanded="false">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <span class="hero-kicker">Premium Flowers</span>
+          <h1 class="hero-title">
+            <span class="hero-title-line">flowers,<span class="hero-title-accent">That last.</span></span>
+            <span class="hero-title-line">Memories<span class="hero-title-accent">that bloom.</span></span>
+          </h1>
+          <p class="hero-description">
+            Beautiful bouquets for every occasion.
+          </p>
+          <div class="hero-actions">
+            <a href="#collection" class="btn hero-collection-link">
+              Shop Now <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+        <img
+          class="hero-mobile-image"
+          src="assets/hero-pink-bouquet-mobile.jpg"
+          alt="A bouquet of vivid pink roses wrapped for gifting"
+        >
+      </div>
+    </section>
+
+    <!-- Featured Collections -->
+    <section class="section collection-section" id="collection">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Signature Creations</span>
+          <h2 class="section-title">The Boutique Collection</h2>
+          <p class="section-subtitle">Every piece is delicately formed by hand. Add to your cart or order directly via WhatsApp.</p>
+        </div>
+
+        <!-- Filter Tags -->
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="all">All Designs</button>
+          <button class="filter-btn" data-filter="lamps">Floral Lamps</button>
+          <button class="filter-btn" data-filter="bouquets">Bouquets</button>
+          <button class="filter-btn" data-filter="custom">Arrangements</button>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid" id="productGrid" aria-live="polite" aria-busy="true">
+          <p class="product-grid-message" role="status">Loading products…</p>
+        </div>
+        <div class="product-load-more" id="productLoadMore" hidden>
+          <p id="productCountSummary" role="status" aria-live="polite"></p>
+          <button type="button" class="btn btn-secondary" id="loadMoreProductsBtn">Load more products</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Custom Order Inquiry Builder -->
+    <section class="section custom-order-section" id="custom-order">
+      <div class="container">
+        <div class="custom-card">
+          <div class="custom-content">
+            <span class="section-tag">Made For You</span>
+            <h2 class="section-title">Design Your Custom Creation</h2>
+            <p class="section-subtitle">
+              Have a specific theme, favorite flowers, or a celebration in mind? Choose your preferences below and send your inquiry directly to our WhatsApp.
+            </p>
+
+            <form id="customOrderForm" class="builder-form" onsubmit="handleCustomSubmit(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="orderType"><i class="fas fa-magic"></i> Product Style</label>
+                  <select id="orderType" required>
+                    <option value="Handcrafted Floral Lamp">Handcrafted Floral Lamp</option>
+                    <option value="Luxury Wrapped Bouquet">Luxury Wrapped Bouquet</option>
+                    <option value="Bloom Gift Box">Bloom Gift Box</option>
+                    <option value="Mini Ceramic Keepsake Pot">Mini Ceramic Keepsake Pot</option>
+                    <option value="Full Custom Theme">Surprise Me / Full Custom Theme</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="orderOccasion"><i class="fas fa-calendar-heart"></i> Occasion</label>
+                  <select id="orderOccasion">
+                    <option value="Birthday Gift">Birthday Gift</option>
+                    <option value="Anniversary Celebration">Anniversary Celebration</option>
+                    <option value="Proposal / Romance">Proposal / Romance</option>
+                    <option value="Home & Bedroom Decor">Home & Bedroom Decor</option>
+                    <option value="Friendship / Just Because">Friendship / Just Because</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="orderColor"><i class="fas fa-palette"></i> Preferred Color Tone</label>
+                  <select id="orderColor">
+                    <option value="Blush Pink & Ivory">Blush Pink & Ivory</option>
+                    <option value="Deep Crimson & Burgundy">Deep Crimson & Burgundy</option>
+                    <option value="Sunny Yellow & Muted Green">Sunny Yellow & Muted Green</option>
+                    <option value="Lilac & Lavender Pastels">Lilac & Lavender Pastels</option>
+                    <option value="Custom Mixed Palette">Custom Mixed Palette</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="orderBudget"><i class="fas fa-wallet"></i> Estimated Budget</label>
+                  <select id="orderBudget">
+                    <option value="Under ₹1,000">Under ₹1,000</option>
+                    <option value="₹1,000 - ₹2,000">₹1,000 - ₹2,000</option>
+                    <option value="₹2,000 - ₹3,500">₹2,000 - ₹3,500</option>
+                    <option value="₹3,500+ Luxury Tier">₹3,500+ Luxury Tier</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="orderNotes"><i class="fas fa-pen-nib"></i> Special Notes / Specific Flower Wishes</label>
+                <textarea id="orderNotes" rows="3" placeholder="e.g. Include mini fairy lights, add handwritten calligraphy note, needed by Saturday in your city across India..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fab fa-whatsapp"></i> Send Custom Request via WhatsApp
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Story -->
+    <section class="section story-section" id="story">
+      <div class="container story-grid">
+        <div class="story-image-wrap">
+          <img src="IMG_5952.jpg" alt="Kriti holding a handmade yellow sunflower bouquet with white blooms and a ribbon" class="story-img">
+        </div>
+
+        <div class="story-text">
+          <span class="section-tag">Behind the Petals</span>
+          <h2 class="section-title">Handmade with heart in Guwahati</h2>
+          <p class="lead-text">
+            Kriti holds a cheerful handmade sunflower bouquet, finished with bright yellow blooms, delicate white flowers, and a soft ribbon.
+          </p>
+          <p class="body-text">
+            Each bouquet is thoughtfully arranged and wrapped by hand, turning little details into a sunny, gift-ready creation.
+          </p>
+          <p class="body-text">
+            From our signature glowing floral lamps that brighten nightstands across Assam to custom bouquets curated for proposals and birthdays, we infuse warmth and heartfelt artistry into every single order.
+          </p>
+          <div class="story-stats">
+            <div class="stat-box">
+              <span class="stat-num">100%</span>
+              <span class="stat-label">Handcrafted</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">&infin;</span>
+              <span class="stat-label">Everlasting</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">Custom</span>
+              <span class="stat-label">Made to Order</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="section why-section" id="why-us">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">The Boutique Difference</span>
+          <h2 class="section-title">Why Choose Flora by Kriti?</h2>
+          <p class="section-subtitle">We focus on sincere craftsmanship, bespoke customization, and reliable local delivery.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-hand-holding-heart"></i></div>
+            <h3 class="feature-title">Perfect Finishing & Attention to Detail</h3>
+            <p class="feature-desc">Every flower, petal, and little detail is carefully finished to ensure a flawless, elegant, and premium look.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-sliders"></i></div>
+            <h3 class="feature-title">Crafted with Care & Precision</h3>
+            <p class="feature-desc">We focus on every texture, shape, colour, and detail to make each floral arrangement look beautiful and feel special.p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-gift"></i></div>
+            <h3 class="feature-title">Quality You Can Trust</h3>
+            <p class="feature-desc">We carefully select premium materials and check every arrangement before it leaves our studio.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-location-dot"></i></div>
+            <h3 class="feature-title">Safe & Secure Delivery</h3>
+            <p class="feature-desc">Every order is carefully packed and handled to prevent damage during transit, ensuring your flowers reach you in perfect condition.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lookbook Gallery -->
+    <section class="section gallery-section" id="gallery">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Visual Lookbook</span>
+          <h2 class="section-title">The Beauty of Blooms</h2>
+          <p class="section-subtitle">A curated collection of floral inspiration and studio moments. Follow <a href="https://www.instagram.com/flora_by_kriti/" target="_blank" rel="noopener"> @flora_by_kriti</a> to see real creations from our studio.</p>
+        </div>
+
+        <div class="gallery-grid">
+          <div class="gallery-item" onclick="openLightbox('book1.jpeg', 'Flora by Kriti book style floral inspiration 1')">
+            <img src="book1.jpeg" alt="Flora by Kriti floral inspiration book cover 1" loading="lazy">
+            <div class="gallery-overlay">
+              <i class="fas fa-search-plus"></i>
+              <span>View Book 1</span>
+            </div>
+          </div>
+
+          <div class="gallery-item" onclick="openLightbox('book2.jpeg', 'Flora by Kriti book style floral inspiration 2')">
+            <img src="book2.jpeg" alt="Flora by Kriti floral inspiration book cover 2" loading="lazy">
+            <div class="gallery-overlay">
+              <i class="fas fa-search-plus"></i>
+              <span>View Book 2</span>
+            </div>
+          </div>
+
+          <div class="gallery-item" onclick="openLightbox('book3.jpeg', 'Flora by Kriti book style floral inspiration 3')">
+            <img src="book3.jpeg" alt="Flora by Kriti floral inspiration book cover 3" loading="lazy">
+            <div class="gallery-overlay">
+              <i class="fas fa-search-plus"></i>
+              <span>View Book 3</span>
+            </div>
+          </div>
+
+          <div class="gallery-item" onclick="openLightbox('book4.jpeg', 'Flora by Kriti book style floral inspiration 4')">
+            <img src="book4.jpeg" alt="Flora by Kriti floral inspiration book cover 4" loading="lazy">
+            <div class="gallery-overlay">
+              <i class="fas fa-search-plus"></i>
+              <span>View Book 4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-cta">
+          <a href="https://www.instagram.com/flora_by_kriti/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+            <i class="fab fa-instagram"></i> Follow @flora_by_kriti for Latest Updates
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Direct Contact Banner -->
+    <section class="section contact-banner" id="contact">
+      <div class="container text-center">
+        <span class="section-tag">Direct Personal Service</span>
+        <h2 class="section-title">Ready to gift something unforgettable?</h2>
+        <p class="section-subtitle">
+          Direct messaging is our fastest way to discuss dates, flower options, and arrange delivery across India.
+        </p>
+        <div class="banner-buttons">
+          <a href="#" class="btn btn-primary btn-large" id="directWhatsappBtn">
+            <i class="fab fa-whatsapp"></i> Chat with Kriti on WhatsApp
+          </a>
+          <a href="https://www.instagram.com/flora_by_kriti/" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-large">
+            <i class="fab fa-instagram"></i> Message on Instagram
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <h3 class="footer-logo">Flora by Kriti</h3>
+        <p class="footer-tagline">Handcrafted luxury bouquets & floral lamps made with heartfelt passion.</p>
+        <p class="footer-location"><i class="fas fa-map-marker-alt"></i> Guwahati, Assam, India</p>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="products.html">Collection</a></li>
+          <li><a href="#custom-order">Custom Orders</a></li>
+          <li><a href="#story">Our Story</a></li>
+          <li><a href="#gallery">Lookbook</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>Connect & Orders</h4>
+        <div class="footer-socials">
+          <a href="https://www.instagram.com/flora_by_kriti/" target="_blank" rel="noopener noreferrer" class="social-link" title="Instagram">
+            <i class="fab fa-instagram"></i> @flora_by_kriti
+          </a>
+          <a href="#" class="social-link" id="footerWhatsappLink" title="WhatsApp">
+            <i class="fab fa-whatsapp"></i> Order on WhatsApp
+          </a>
+        </div>
+        <p class="order-notice">
+          <small><i class="fas fa-info-circle"></i> Handcrafted orders assembled per request and delivered across India.</small>
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container bottom-row">
+        <p>&copy; <span id="currentYear"></span> Flora by Kriti. Handcrafted with love.</p>
+        <p class="footer-location-stamp">Guwahati, India</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal for Gallery -->
+  <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+      <img src="" alt="Enlarged floral creation" id="lightboxImg">
+      <p id="lightboxCaption" class="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- Mobile Floating WhatsApp Button -->
+  <a href="#" class="floating-whatsapp" id="floatingWhatsappBtn" aria-label="Quick WhatsApp order">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+
+  <!-- ======================================================================
+       E-COMMERCE ADDITIONS: SLIDE-OUT CART & CHECKOUT MODAL
+       ====================================================================== -->
+  <!-- Cart Dimmer Overlay -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <!-- Slide-out Cart Drawer -->
+  <aside class="cart-sidebar" id="cartSidebar" aria-label="Shopping Cart Drawer">
+    <div class="cart-header">
+      <div class="cart-title-box">
+        <i class="fas fa-shopping-bag"></i>
+        <h3>Your Botanical Basket</h3>
+      </div>
+      <button class="cart-close-btn" id="closeCartBtn" aria-label="Close cart">&times;</button>
+    </div>
+
+    <!-- Empty State -->
+    <div class="cart-empty-state" id="cartEmptyState">
+      <div class="empty-icon">🌸</div>
+      <h4>Your basket is empty</h4>
+      <p>Browse our handcrafted collection and add lasting creations.</p>
+      <button type="button" class="btn btn-secondary" onclick="closeCartDrawer()">Explore Collection</button>
+    </div>
+
+    <!-- Cart Items Scroll List -->
+    <div class="cart-items-container" id="cartItemsList">
+      <!-- Items dynamically populated via JavaScript -->
+    </div>
+
+    <!-- Cart Footer & Price Calculation -->
+    <div class="cart-footer" id="cartFooter">
+      <div class="cart-summary-row">
+        <span>Delivery (All India):</span>
+        <span class="delivery-badge">Calculated at checkout</span>
+      </div>
+      <div class="cart-summary-row total-row">
+        <span>Grand Total:</span>
+        <span class="cart-grand-total" id="cartGrandTotal">₹0</span>
+      </div>
+      <button type="button" class="btn btn-primary btn-block checkout-btn" id="checkoutBtn">
+        Proceed to Checkout <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Checkout Modal -->
+  <div class="checkout-modal" id="checkoutModal">
+    <div class="checkout-modal-content">
+      <button type="button" class="checkout-modal-close" id="closeCheckoutBtn">&times;</button>
+      
+      <section class="checkout-auth-gate" id="checkoutAuthGate" hidden aria-labelledby="checkoutAuthTitle">
+        <span class="section-tag">Your basket is saved</span>
+        <h2 class="checkout-title" id="checkoutAuthTitle">Sign in to place your order</h2>
+        <p class="checkout-subtitle">Please sign in or create a Flora by Kriti account before checkout. We’ll bring you back to your basket afterwards.</p>
+        <div class="checkout-auth-actions">
+          <a class="btn btn-primary" id="checkoutSignInLink" href="account.html">Sign in</a>
+          <a class="btn btn-secondary" id="checkoutCreateAccountLink" href="account.html">Create an account</a>
+        </div>
+        <p class="checkout-auth-note">Your basket will stay saved while you sign in.</p>
+      </section>
+
+      <div id="checkoutFormSection">
+        <div class="checkout-header">
+          <span class="section-tag">Order Summary</span>
+          <h2 class="checkout-title">Review & Delivery Details</h2>
+          <p class="checkout-subtitle">Please verify your items and share your delivery information for your India delivery.</p>
+        </div>
+
+        <!-- Checkout Summary Items -->
+        <div class="checkout-summary-box">
+          <div class="checkout-items-preview" id="checkoutItemsPreview"></div>
+          <div class="checkout-total-bar">
+            <span>Total Payable:</span>
+            <span class="checkout-payable" id="checkoutPayableAmount">₹0</span>
+          </div>
+        </div>
+
+        <!-- Customer Details Form -->
+        <form id="checkoutForm" onsubmit="handleCheckoutFormSubmit(event)">
+          <div class="form-group saved-address-group" id="savedAddressGroup" hidden>
+            <label for="savedAddressSelect"><i class="fas fa-address-book"></i> Saved delivery address</label>
+            <select id="savedAddressSelect">
+              <option value="">Choose a saved address (optional)</option>
+            </select>
+            <p class="saved-address-status" id="savedAddressStatus" role="status"></p>
+          </div>
+
+          <div class="checkout-form-grid">
+            <div class="form-group">
+              <label for="custName"><i class="fas fa-user"></i> Full Name *</label>
+              <input type="text" id="custName" required placeholder="e.g. Priya Sharma">
+            </div>
+            <div class="form-group">
+              <label for="custPhone"><i class="fas fa-phone"></i> Phone Number *</label>
+              <input type="tel" id="custPhone" required placeholder="10-digit mobile number" pattern="[0-9]{10}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="custAddress"><i class="fas fa-location-dot"></i> Delivery Address *</label>
+            <textarea id="custAddress" rows="2" required placeholder="House / Flat No., Landmark, Locality, Pincode"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="custNotes"><i class="fas fa-pen-nib"></i> Gift Note / Specific Instructions (Optional)</label>
+            <input type="text" id="custNotes" placeholder="e.g. Write 'Happy Birthday Rhea' on calligraphy card">
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-shield-heart"></i> Security Verification *</label>
+            <div id="checkoutTurnstile"></div>
+            <p id="checkoutError" role="alert" aria-live="assertive" style="display: none; color: #a33; margin: 0;"></p>
+          </div>
+
+          <div class="payment-disclaimer">
+            <i class="fas fa-shield-heart"></i>
+            <span><strong>Transparent Booking:</strong> No immediate online debit. Our artisan will confirm the arrangement schedule and share secure payment details directly before handcrafting.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-place-order" id="submitOrderBtn">
+            Confirm & Place Order <i class="fas fa-check"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- Order Confirmation Message State -->
+      <div class="checkout-confirmation-screen" id="checkoutConfirmationScreen" style="display: none;">
+        <div class="confirm-icon">✨</div>
+        <h3 class="confirm-title">Order Request Received!</h3>
+        <p class="confirm-lead" id="confirmCustomerGreeting">Thank you for supporting handcrafted floral artistry.</p>
+        
+        <div class="order-receipt-card" id="confirmReceiptDetails">
+          <!-- Filled by JS -->
+        </div>
+
+        <p class="confirm-helper-text">
+          A copy has been prepared for our studio. You can also send this order directly to Kriti on WhatsApp for expedited processing:
+        </p>
+
+        <a href="#" target="_blank" class="btn btn-primary btn-block" id="confirmWhatsAppBtn">
+          <i class="fab fa-whatsapp"></i> Chat with Studio on WhatsApp
+        </a>
+        <button type="button" class="btn btn-secondary btn-block mt-3" onclick="closeCheckoutModal()">
+          Continue Browsing
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notification Toast for Add to Cart -->
+  <div class="cart-toast" id="cartToast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Item added to your basket</span>
+  </div>
+
+  <!-- Script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

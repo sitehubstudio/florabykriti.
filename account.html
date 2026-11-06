@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account | Flora by Kriti</title>
+  <meta name="description" content="Sign in to Flora by Kriti to view orders, track deliveries, and manage your profile and saved addresses.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="account.css">
+</head>
+<body class="account-page">
+  <header class="site-header account-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo">
+        <span class="brand-text">
+          <span class="brand-name">Flora by Kriti</span>
+          <span class="brand-subtitle">Artisan Floral Studio &bull; Guwahati</span>
+        </span>
+      </a>
+      <a class="btn btn-secondary" href="products.html">Continue shopping</a>
+    </div>
+  </header>
+
+  <main class="account-main">
+    <div class="account-heading">
+      <span class="section-tag">Your Flora account</span>
+      <h1 class="account-title">My Account</h1>
+      <p>Manage your details and keep up with your Flora by Kriti orders.</p>
+    </div>
+
+    <p class="account-message" id="accountMessage" role="status" aria-live="polite"></p>
+
+    <section class="account-auth card" id="accountAuth" aria-labelledby="authTitle">
+      <div class="account-auth-tabs" role="tablist" aria-label="Account access">
+        <button type="button" class="account-tab active" data-auth-view="login" role="tab" aria-selected="true">Sign in</button>
+        <button type="button" class="account-tab" data-auth-view="register" role="tab" aria-selected="false">Create account</button>
+        <button type="button" class="account-tab" data-auth-view="reset" role="tab" aria-selected="false">Reset password</button>
+      </div>
+
+      <div class="account-auth-panel" data-auth-panel="login">
+        <h2 id="authTitle">Welcome back</h2>
+        <form id="loginForm" class="account-form">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" autocomplete="username" required>
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" required>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+      </div>
+
+      <div class="account-auth-panel" data-auth-panel="register" hidden>
+        <h2>Create your account</h2>
+        <form id="registerForm" class="account-form">
+          <label for="registerName">Full name</label>
+          <input id="registerName" type="text" maxlength="120" autocomplete="name" required>
+          <label for="registerPhone">Phone number</label>
+          <input id="registerPhone" type="tel" maxlength="24" autocomplete="tel" required>
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" autocomplete="email" required>
+          <label for="registerPassword">Password (at least 8 characters)</label>
+          <input id="registerPassword" type="password" minlength="8" autocomplete="new-password" required>
+          <button class="btn btn-primary" type="submit">Create account</button>
+        </form>
+      </div>
+
+      <div class="account-auth-panel" data-auth-panel="reset" hidden>
+        <h2>Reset your password</h2>
+        <form id="resetForm" class="account-form">
+          <label for="resetEmail">Account email</label>
+          <input id="resetEmail" type="email" autocomplete="email" required>
+          <button class="btn btn-primary" type="submit">Send reset link</button>
+        </form>
+        <form id="newPasswordForm" class="account-form" hidden>
+          <label for="newPassword">New password (at least 8 characters)</label>
+          <input id="newPassword" type="password" minlength="8" autocomplete="new-password" required>
+          <button class="btn btn-primary" type="submit">Update password</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="account-dashboard" id="accountDashboard" hidden>
+      <div class="account-layout">
+        <nav class="account-nav" aria-label="Account sections">
+          <button type="button" class="active" data-account-view="overview">My Account</button>
+          <button type="button" data-account-view="orders">My Orders</button>
+          <button type="button" data-account-view="tracking">Track Orders</button>
+          <button type="button" data-account-view="addresses">My Addresses</button>
+          <button type="button" data-account-view="profile">Edit Profile</button>
+          <button type="button" class="account-logout" id="logoutButton">Log out</button>
+        </nav>
+
+        <div class="account-content">
+          <section class="account-panel" data-account-panel="overview">
+            <h2 id="welcomeHeading">Welcome</h2>
+            <p>Here you can review your orders, delivery progress, saved addresses, and profile details.</p>
+            <div class="account-summary-grid">
+              <article class="account-summary">
+                <span>Orders</span>
+                <strong id="orderCount">0</strong>
+                <button type="button" data-open-account-view="orders">View orders</button>
+              </article>
+              <article class="account-summary">
+                <span>Saved addresses</span>
+                <strong id="addressCount">0</strong>
+                <button type="button" data-open-account-view="addresses">Manage addresses</button>
+              </article>
+            </div>
+          </section>
+
+          <section class="account-panel" data-account-panel="orders" hidden>
+            <h2>My Orders</h2>
+            <p class="account-panel-intro">Only orders placed while signed in are shown here. Earlier guest orders remain guest orders.</p>
+            <div class="account-order-list" id="accountOrderList"></div>
+          </section>
+
+          <section class="account-panel" data-account-panel="tracking" hidden>
+            <h2>Track Orders</h2>
+            <label for="trackingOrderSelect">Choose an order</label>
+            <select id="trackingOrderSelect"></select>
+            <div class="tracking-result" id="trackingResult"></div>
+          </section>
+
+          <section class="account-panel" data-account-panel="addresses" hidden>
+            <div class="account-panel-heading">
+              <div>
+                <h2>My Addresses</h2>
+                <p>Keep delivery details ready for your next order.</p>
+              </div>
+              <button type="button" class="btn btn-secondary" id="addAddressButton">Add address</button>
+            </div>
+            <div class="saved-address-list" id="savedAddressList"></div>
+            <form id="addressForm" class="account-form address-editor" hidden>
+              <h3 id="addressFormTitle">Add a delivery address</h3>
+              <input id="addressId" type="hidden">
+              <label for="addressLabel">Address label</label>
+              <input id="addressLabel" maxlength="60" placeholder="Home, Work" required>
+              <label for="addressRecipient">Recipient name</label>
+              <input id="addressRecipient" maxlength="120" autocomplete="name" required>
+              <label for="addressPhone">Phone number</label>
+              <input id="addressPhone" type="tel" maxlength="24" autocomplete="tel" required>
+              <label for="addressText">Delivery address</label>
+              <textarea id="addressText" rows="3" maxlength="1000" autocomplete="street-address" required></textarea>
+              <label class="account-checkbox"><input id="addressDefault" type="checkbox"> Make this my default address</label>
+              <div class="account-form-actions">
+                <button class="btn btn-primary" type="submit">Save address</button>
+                <button class="btn btn-secondary" type="button" id="cancelAddressButton">Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="account-panel" data-account-panel="profile" hidden>
+            <h2>Edit Profile</h2>
+            <form id="profileForm" class="account-form">
+              <label for="profileName">Full name</label>
+              <input id="profileName" maxlength="120" autocomplete="name" required>
+              <label for="profilePhone">Phone number</label>
+              <input id="profilePhone" type="tel" maxlength="24" autocomplete="tel">
+              <label for="profileEmail">Email</label>
+              <input id="profileEmail" type="email" disabled>
+              <button class="btn btn-primary" type="submit">Save profile</button>
+            </form>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="account-footer">
+    <a href="index.html">Flora by Kriti</a>
+    <span>Handcrafted with love in Guwahati.</span>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="account.js"></script>
+</body>
+</html>

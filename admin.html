@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Admin | Flora by Kriti</title>
+  <meta name="description" content="Private order and product management dashboard for Flora by Kriti.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-page">
+  <header class="site-header">
+    <div class="nav-container admin-nav">
+      <a href="index.html" class="brand-logo">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+              <path d="M32 66V34M32 49C24 43 19 36 17 27M32 52C40 46 45 39 47 30M32 42C25 37 23 30 24 23M32 38C39 32 40 26 38 20"/>
+              <path d="M17 27C9 28 7 22 12 17C15 14 19 17 21 21M17 27C12 21 13 15 18 13C22 12 24 17 24 23M47 30C55 30 58 24 53 19C50 16 46 19 43 24M47 30C52 24 51 18 46 16C42 15 39 19 38 25"/>
+              <path d="M31 34C25 31 20 26 20 20C20 16 24 14 27 17C30 19 31 23 32 27C33 22 35 17 39 16C43 15 46 19 44 23C42 28 37 32 32 34Z"/>
+              <path d="M23 45C18 40 13 39 11 42C9 46 14 50 23 51M41 48C47 43 52 43 54 46C56 50 50 53 41 54"/>
+            </g>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Flora by Kriti</span>
+          <span class="brand-subtitle">Shop Admin</span>
+        </span>
+      </a>
+      <a class="btn btn-secondary" href="index.html">View storefront</a>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-panel" id="loginPanel" aria-labelledby="loginTitle">
+      <span class="section-tag">Owner access</span>
+      <h1 class="admin-title" id="loginTitle">Sign in to manage your shop</h1>
+      <p class="admin-intro">Use the owner account created in Supabase Authentication.</p>
+      <form id="loginForm" class="admin-form">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" name="email" type="email" autocomplete="username" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+      </form>
+      <p class="admin-status" id="loginStatus" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="admin-panel admin-dashboard" id="dashboardPanel" hidden>
+      <div class="admin-heading-row">
+        <div>
+          <span class="section-tag">Flora by Kriti</span>
+          <h1 class="admin-title">Shop dashboard</h1>
+        </div>
+        <button class="btn btn-secondary" type="button" id="signOutBtn">Sign out</button>
+      </div>
+
+      <p class="admin-status" id="dashboardStatus" role="status" aria-live="polite"></p>
+
+      <nav class="admin-tabs" role="tablist" aria-label="Admin sections">
+        <button class="admin-tab" id="ordersTab" type="button" role="tab" aria-selected="true" aria-controls="ordersPage" data-admin-tab="orders">Orders</button>
+        <button class="admin-tab" id="productsTab" type="button" role="tab" aria-selected="false" aria-controls="productsPage" data-admin-tab="products" tabindex="-1">Products</button>
+        <button class="admin-tab" id="settingsTab" type="button" role="tab" aria-selected="false" aria-controls="settingsPage" data-admin-tab="settings" tabindex="-1">WhatsApp & payment</button>
+      </nav>
+
+      <section class="admin-tab-panel" id="ordersPage" role="tabpanel" aria-labelledby="ordersTab">
+        <section class="admin-orders-section" aria-labelledby="ordersHeading">
+          <div class="admin-heading-row">
+            <div>
+              <h2 id="ordersHeading">Orders</h2>
+              <p class="admin-help">Send one WhatsApp message to confirm the order and request payment. After verifying payment, use “Mark as Paid & Confirm Order” to update both statuses together.</p>
+            </div>
+            <button class="btn btn-secondary" type="button" id="refreshOrdersBtn">Refresh orders</button>
+          </div>
+          <p class="admin-status" id="ordersStatus" role="status" aria-live="polite"></p>
+          <div class="admin-order-list" id="adminOrderList" aria-live="polite" aria-busy="true">
+            <p class="admin-help">Loading orders…</p>
+          </div>
+          <nav class="admin-order-pagination" aria-label="Order pages">
+            <button class="btn btn-secondary" type="button" id="previousOrdersBtn" disabled>Previous</button>
+            <p class="admin-help" id="orderPageSummary" aria-live="polite"></p>
+            <button class="btn btn-secondary" type="button" id="nextOrdersBtn" disabled>Next</button>
+          </nav>
+        </section>
+      </section>
+
+      <section class="admin-tab-panel" id="productsPage" role="tabpanel" aria-labelledby="productsTab" hidden>
+      <form id="productForm" class="admin-form admin-product-form">
+        <h2 id="formTitle">Add a product</h2>
+        <input id="productId" type="hidden">
+
+        <label for="productName">Product name</label>
+        <input id="productName" name="name" type="text" maxlength="120" required>
+
+        <div class="admin-form-row">
+          <div>
+            <label for="productPrice">Price (INR)</label>
+            <input id="productPrice" name="price" type="number" min="0.01" step="0.01" required>
+          </div>
+          <div>
+            <label for="productCategory">Category</label>
+            <select id="productCategory" name="category" required>
+              <option value="lamps">Floral Lamps</option>
+              <option value="bouquets">Bouquets</option>
+              <option value="custom">Custom Arrangements</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="productDescription">Description</label>
+        <textarea id="productDescription" name="description" rows="4" maxlength="1000" required></textarea>
+
+        <label for="productImage">Product image</label>
+        <input id="productImage" name="image" type="file" accept="image/jpeg,image/png,image/webp" required>
+        <span class="admin-help" id="imageHelp">JPEG, PNG, or WebP; up to 5 MB. Leave empty when editing to keep the current image.</span>
+        <img class="admin-image-preview" id="imagePreview" alt="Selected product image preview" hidden>
+
+        <label class="admin-checkbox">
+          <input id="productActive" type="checkbox" checked>
+          <span>Show this product in the storefront</span>
+        </label>
+
+        <div class="admin-form-actions">
+          <button class="btn btn-primary" type="submit" id="saveProductBtn">Save product</button>
+          <button class="btn btn-secondary" type="button" id="cancelEditBtn" hidden>Cancel edit</button>
+        </div>
+      </form>
+
+      <section class="admin-products-section" aria-labelledby="productsHeading">
+        <div class="admin-heading-row">
+          <h2 id="productsHeading">Products</h2>
+          <button class="btn btn-secondary" type="button" id="refreshProductsBtn">Refresh list</button>
+        </div>
+        <div class="admin-product-list" id="adminProductList" aria-live="polite" aria-busy="true">
+          <p class="admin-help">Loading products…</p>
+        </div>
+      </section>
+      </section>
+
+      <section class="admin-tab-panel" id="settingsPage" role="tabpanel" aria-labelledby="settingsTab" hidden>
+        <form id="communicationSettingsForm" class="admin-form admin-product-form" aria-labelledby="communicationSettingsHeading">
+          <h2 id="communicationSettingsHeading">WhatsApp & payment settings</h2>
+          <p class="admin-help">The payment request can include these details automatically. UPI information is optional—leave it blank if you share payment details separately. Messages open in WhatsApp for you to review and send.</p>
+          <label for="businessWhatsappNumber">Business WhatsApp number</label>
+          <input id="businessWhatsappNumber" name="businessWhatsappNumber" type="tel" inputmode="numeric" pattern="[0-9]{8,15}" maxlength="15" placeholder="Country code + number, digits only">
+          <span class="admin-help">Use international format without + or spaces. WhatsApp opens using the account signed in on this device.</span>
+
+          <label for="businessUpiId">UPI ID (optional)</label>
+          <input id="businessUpiId" name="businessUpiId" type="text" maxlength="120" placeholder="Your configured UPI ID">
+
+          <label for="businessPaymentInstructions">Payment instructions (optional)</label>
+          <textarea id="businessPaymentInstructions" name="businessPaymentInstructions" rows="3" maxlength="500" placeholder="For example, how to pay and what reference to include"></textarea>
+
+          <div class="admin-form-actions">
+            <button class="btn btn-primary" type="submit" id="saveCommunicationSettingsBtn">Save settings</button>
+          </div>
+          <p class="admin-status" id="communicationSettingsStatus" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
