@@ -197,18 +197,18 @@ function preparePaymentMessage(orderId) {
   }
 
   const message = [
-    "🌸 *Flora by Kriti*",
+    "*Flora by Kriti*",
     "",
     "Your order is almost confirmed!",
     "",
     "Please complete your payment to proceed with your order.",
     "",
-    `💰 *Order Amount:* ${formatPrice(order.total_amount)}`,
-    `💳 *Payment Method:* ${methodSelect.value}`,
+    `Order Amount: ${formatPrice(order.total_amount)}`,
+    `Payment Method: ${methodSelect.value}`,
     "",
     "Once the payment is completed, please share the payment screenshot with us.",
     "",
-    "Thank you for shopping with Flora by Kriti! 💐"
+    "Thank you for shopping with Flora by Kriti!"
   ].join("\n");
   const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
   window.open(whatsappUrl, "_blank", "noopener,noreferrer");
@@ -230,16 +230,12 @@ function prepareOrderStatusUpdate(orderId) {
     return;
   }
 
-  const trackingUrl = new URL("track-order.html", window.location.href);
-  trackingUrl.searchParams.set("order", String(order.order_number));
   const message = [
-    "🌸 *Flora by Kriti — Order Update*",
+    "*Flora by Kriti — Order Update*",
     "",
     `Your order #${order.order_number} is now: *${orderStatusLabel(statusSelect.value)}*`,
     "",
-    `Track your order anytime: ${trackingUrl.href}`,
-    "",
-    "Thank you for shopping with Flora by Kriti! 💐"
+    "Thank you for shopping with Flora by Kriti!"
   ].join("\n");
   window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
 }
