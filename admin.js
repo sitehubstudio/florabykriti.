@@ -120,16 +120,14 @@ function renderAdminOrders() {
         <p><strong>Payment:</strong> ${escapeAdminHTML(paymentMethodLabel(order.payment_method))} · ${escapeAdminHTML(paymentStatusLabel(order.payment_status))}</p>
         ${order.tracking_information ? `<p><strong>Tracking:</strong> ${escapeAdminHTML(order.tracking_information)}</p>` : ""}
       </div>
-      <div class="admin-order-status">
-        <label for="order-status-${escapeAdminHTML(order.id)}">Status</label>
-        <select id="order-status-${escapeAdminHTML(order.id)}" data-order-status="${escapeAdminHTML(order.id)}">
-          ${["pending", "confirmed", "processing", "shipped", "delivered", "fulfilled", "cancelled"].map(status => `
-            <option value="${status}" ${order.status === status ? "selected" : ""}>${status[0].toUpperCase()}${status.slice(1)}</option>
-          `).join("")}
-        </select>
-        <button class="btn btn-secondary" type="button" data-save-order-status="${escapeAdminHTML(order.id)}">Save status</button>
-      </div>
       <div class="admin-order-edit-grid">
+        <label>Order status
+          <select data-order-status="${escapeAdminHTML(order.id)}">
+            ${["pending", "pending_confirmation", "confirmed", "processing", "shipped", "delivered", "fulfilled", "cancelled"].map(status => `
+              <option value="${status}" ${order.status === status ? "selected" : ""}>${status[0].toUpperCase()}${status.slice(1)}</option>
+            `).join("")}
+          </select>
+        </label>
         <label>Payment method
           <select data-payment-method="${escapeAdminHTML(order.id)}">
             <option value="" ${!order.payment_method ? "selected" : ""}>Not selected</option>
@@ -246,20 +244,6 @@ async function loadAdminOrders() {
   renderAdminOrders();
 }
 
-async function saveOrderStatus(orderId) {
-  const order = adminOrders.find(item => String(item.id) === orderId);
-  const select = orderList.querySelector(`[data-order-status="${CSS.escape(orderId)}"]`);
-  const button = orderList.querySelector(`[data-save-order-status="${CSS.escape(orderId)}"]`);
-  if (!order || !select || !button) return;
-
-  button.disabled = true;
-  try {
-    await updateOrderStatus(order, select.value);
-  } finally {
-    button.disabled = false;
-  }
-}
-
 async function updateOrderStatus(order, status) {
   ordersStatus.textContent = "";
   try {
@@ -278,7 +262,10 @@ async function updateOrderStatus(order, status) {
     await loadAdminOrders();
   } catch (error) {
     console.error("Could not update order status:", error);
-    setStatus(ordersStatus, `Could not update order status: ${error.message || "Unexpected error."}`);
+    const message = error.code === "23514"
+      ? `The database does not allow the status "${status}". Run supabase-order-status-constraint.sql in Supabase, then try again.`
+      : `Could not update order status: ${error.message || "Unexpected error."}`;
+    setStatus(ordersStatus, message);
   }
 }
 
@@ -313,10 +300,11 @@ async function markOrderPaidAndConfirmed(order) {
 
 async function saveOrderDetails(orderId, button) {
   const order = adminOrders.find(item => String(item.id) === orderId);
+  const status = orderList.querySelector(`[data-order-status="${CSS.escape(orderId)}"]`)?.value;
   const paymentMethod = orderList.querySelector(`[data-payment-method="${CSS.escape(orderId)}"]`)?.value || null;
   const paymentStatus = orderList.querySelector(`[data-payment-status="${CSS.escape(orderId)}"]`)?.value;
   const trackingInformation = orderList.querySelector(`[data-tracking-information="${CSS.escape(orderId)}"]`)?.value.trim() || null;
-  if (!order || !paymentStatus) return;
+  if (!order || !status || !paymentStatus) return;
 
   button.disabled = true;
   ordersStatus.textContent = "";
@@ -324,6 +312,7 @@ async function saveOrderDetails(orderId, button) {
     const { data, error } = await window.floraSupabase
       .from("orders")
       .update({
+        status,
         payment_method: paymentMethod,
         payment_status: paymentStatus,
         tracking_information: trackingInformation
@@ -334,11 +323,14 @@ async function saveOrderDetails(orderId, button) {
     if (error) throw error;
     if (!data) throw new Error("No order was updated. Check owner access and database policies.");
 
-    setStatus(ordersStatus, `Payment and tracking details saved for order #${order.order_number}.`, "success");
+    setStatus(ordersStatus, `Order details saved for order #${order.order_number}.`, "success");
     await loadAdminOrders();
   } catch (error) {
     console.error("Could not save order details:", error);
-    setStatus(ordersStatus, `Could not save order details: ${error.message || "Unexpected error."}`);
+    const message = error.code === "23514"
+      ? `The database does not allow the selected order status. Run supabase-order-status-constraint.sql in Supabase, then try again.`
+      : `Could not save order details: ${error.message || "Unexpected error."}`;
+    setStatus(ordersStatus, message);
   } finally {
     button.disabled = false;
   }
@@ -352,37 +344,52 @@ function getCustomerWhatsAppNumber(phone) {
 }
 
 function getOrderConfirmationMessage(order) {
-  const items = (order.items || []).map(item =>
-    `• ${item.product_name} × ${item.quantity} — ${formatPrice(Number(item.unit_price) * Number(item.quantity))}`
-  );
-  const lines = [
-    "Flora by Kriti — Order confirmation",
-    "",
-    `We’ve received order #${order.order_number}.`,
-    "",
-    "Order summary:",
-    ...(items.length ? items : ["• Product details unavailable"]),
-    `Total: ${formatPrice(order.total_amount)}`,
-    `Delivery address: ${order.delivery_address}`
-  ];
-
   if (order.payment_status === "paid") {
-    lines.push("", "Your order is confirmed and being prepared. We’ll keep you updated about the delivery date.");
-  } else if (order.payment_method === "upi") {
-    lines.push("", `To confirm your order, please pay ${formatPrice(order.total_amount)}.`);
-    if (communicationSettings.upi_id) lines.push(`UPI ID: ${communicationSettings.upi_id}`);
-    if (communicationSettings.payment_instructions) lines.push(communicationSettings.payment_instructions);
-    if (!communicationSettings.upi_id && !communicationSettings.payment_instructions) {
-      lines.push("Reply to this message and we’ll share the payment details.");
-    }
-    lines.push("After paying, please send a screenshot of the payment confirmation. We’ll confirm your order and update you about the delivery date.");
-  } else if (order.payment_method === "cod") {
-    lines.push("", `Your order is confirmed. Please pay ${formatPrice(order.total_amount)} when it is delivered.`);
-  } else {
-    lines.push("", "We’ll confirm your payment method and share the payment details shortly.");
+    const statusMessages = {
+      pending: "Your payment has been received. We will confirm your order shortly.",
+      confirmed: "Your payment has been received and your order is confirmed. We are preparing it now.",
+      processing: "Your order is being prepared. We will share another update when it is shipped.",
+      shipped: [
+        "Your order has been shipped.",
+        order.tracking_information ? `Tracking information: ${order.tracking_information}` : ""
+      ].filter(Boolean).join("\n"),
+      delivered: "Your order has been delivered. We hope you love it!",
+      fulfilled: "Your order has been fulfilled. Thank you for shopping with us."
+    };
+    const statusMessage = statusMessages[order.status] || "Your payment has been received. We will keep you updated about your order.";
+    return [
+      "*Flora by Kriti*",
+      "",
+      `Update for order #${order.order_number}:`,
+      statusMessage,
+      "",
+      "Thank you for choosing *Flora by Kriti*!"
+    ].join("\n");
   }
 
-  lines.push("", "Thank you for choosing Flora by Kriti.");
+  const items = order.items || [];
+  const products = items.length
+    ? items.map(item => `${item.product_name} × ${item.quantity}`).join(", ")
+    : "Product details unavailable";
+  const lines = [
+    "*Flora by Kriti*",
+    "",
+    "Hello! Your order has been received successfully.",
+    "",
+    "*Order Details:*",
+    `Product: ${products}`,
+    `Total Amount: ${formatPrice(order.total_amount)}`,
+    "",
+    `Please complete the payment of *${formatPrice(order.total_amount)}* to confirm and process your order.`,
+    "",
+    "Once the payment is completed, kindly share the payment screenshot with us."
+  ];
+
+  if (order.payment_method === "upi") {
+    if (communicationSettings.upi_id) lines.push("", `UPI ID: ${communicationSettings.upi_id}`);
+    if (communicationSettings.payment_instructions) lines.push(communicationSettings.payment_instructions);
+  }
+  lines.push("", "Thank you for choosing *Flora by Kriti*!");
   return lines.join("\n");
 }
 
@@ -922,11 +929,6 @@ orderList.addEventListener("click", event => {
     return;
   }
 
-  const statusButton = event.target.closest("[data-save-order-status]");
-  if (statusButton) {
-    void saveOrderStatus(statusButton.dataset.saveOrderStatus);
-    return;
-  }
 });
 
 imageInput.required = true;
